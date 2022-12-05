@@ -1,33 +1,39 @@
 const assert = require("assert").strict;
 const fs = require("fs");
 
-// constraints about input
+// https://adventofcode.com/2022/day/1
+
+// found results
 const NumberOfElves = 235;
-const ElfCarryingMostCaloriesIndex = "217";
-const ElfCarryingMostCaloriesCount = 72602;
+const GreaterCaloriesCarried = 72602;
+const TopThreeElvesCarryingMostCaloriesTotal = 207410;
 
 const input = fs.readFileSync("./input.txt", { encoding: "utf-8" });
 
-const elves = input.split("\n\n");
+const elves = input.split("\n\n").map((caloriesAsString) => {
+  const caloriesAsNumber = caloriesAsString.split("\n").map(Number);
+  const caloriesSum = caloriesAsNumber.reduce(
+    (sum, calories) => (sum += calories),
+    0
+  );
 
-assert.equal(elves.length, NumberOfElves, "incorrect number of elves");
-
-const elfCarryingMostCalories = {
-  index: 0,
-  calories: 0,
-};
-
-for (const elf in elves) {
-  const calories = elves[elf].split("\n").map(Number);
-  const sum = calories.reduce((sum, calories) => (sum += calories), 0);
-
-  if (sum > elfCarryingMostCalories.calories) {
-    elfCarryingMostCalories.calories = sum;
-    elfCarryingMostCalories.index = elf;
-  }
-}
-
-assert.deepStrictEqual(elfCarryingMostCalories, {
-  index: ElfCarryingMostCaloriesIndex,
-  calories: ElfCarryingMostCaloriesCount,
+  return caloriesSum;
 });
+
+assert.equal(elves.length, NumberOfElves);
+
+elves.sort((a, b) => b - a);
+
+assert.equal(elves[0], GreaterCaloriesCarried);
+
+const topThreeElvesCarryingMostCalories = elves.slice(0, 3);
+const topThreeElvesCarryingMostCaloriesTotal =
+  topThreeElvesCarryingMostCalories.reduce(
+    (sum, calories) => (sum += calories),
+    0
+  );
+
+assert.equal(
+  topThreeElvesCarryingMostCaloriesTotal,
+  TopThreeElvesCarryingMostCaloriesTotal
+);
