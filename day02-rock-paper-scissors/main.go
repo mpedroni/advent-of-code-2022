@@ -20,13 +20,20 @@ Points
 	3 = Draw
 	6 = Win
 
-- [ ] get my points for a given game
-- [ ] Rock > Scissors, Scissors > Paper, Paper > Rock
-- [ ] A Y (8)
-	  B X (1)
-	  C Z (6)
-	  -> score of 15
+- get my points for a given game
+- Rock > Scissors, Scissors > Paper, Paper > Rock
+- A Y (8)
+  B X (1)
+  C Z (6)
+  -> score of 15
 **/
+
+/* part two:
+
+- X > need to lose
+- Y > need to end in a draw
+- Z > need to win
+*/
 
 import (
 	"fmt"
@@ -92,6 +99,38 @@ func GetPoints(opponent, me Shape) int {
 	return points
 }
 
+func GetShapeLosesFrom(shape Shape) Shape {
+	if shape == Rock {
+		return Scissors
+	}
+
+	if shape == Paper {
+		return Rock
+	}
+
+	if shape == Scissors {
+		return Paper
+	}
+
+	panic("")
+}
+
+func GetShapeBeats(shape Shape) Shape {
+	if shape == Rock {
+		return Paper
+	}
+
+	if shape == Paper {
+		return Scissors
+	}
+
+	if shape == Scissors {
+		return Rock
+	}
+
+	panic("")
+}
+
 type Shape int
 
 const (
@@ -131,5 +170,24 @@ func main() {
 		points += GetPoints(opponent[opponentCode], me[myCode])
 	}
 
-	fmt.Println("points", points)
+	fmt.Println("[part one] points", points)
+
+	points = 0
+	for _, match := range matches {
+		opponentCode, myCode := match[0], match[1]
+
+		if myCode == "X" { // need to lose
+			points += GetPoints(opponent[opponentCode], GetShapeLosesFrom(opponent[opponentCode]))
+		}
+
+		if myCode == "Y" { // need to draw
+			points += GetPoints(opponent[opponentCode], opponent[opponentCode])
+		}
+
+		if myCode == "Z" { // need to win
+			points += GetPoints(opponent[opponentCode], GetShapeBeats(opponent[opponentCode]))
+		}
+	}
+
+	fmt.Println("[part two] points", points)
 }
