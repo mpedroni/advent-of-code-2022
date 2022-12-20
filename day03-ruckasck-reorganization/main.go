@@ -15,7 +15,8 @@ import (
 - sum that priorities
 */
 
-type Rucksack = []string
+type Rucksack = string
+type Compartments = []string
 
 func ParseInputFile(filename string) []Rucksack {
 	file, err := os.ReadFile(filename)
@@ -26,10 +27,7 @@ func ParseInputFile(filename string) []Rucksack {
 	input := string(file)
 	rucksacks := make([]Rucksack, 0)
 
-	for _, rucksack := range strings.Split(input, "\n") {
-		compartments := Rucksack{rucksack[:len(rucksack)/2], rucksack[len(rucksack)/2:]}
-		rucksacks = append(rucksacks, compartments)
-	}
+	rucksacks = append(rucksacks, strings.Split(input, "\n")...)
 
 	return rucksacks
 }
@@ -61,15 +59,15 @@ func GetIntersectionPriorities(intersection []string) int {
 	return int(priority)
 }
 
-func GetRucksackIntersections(rucksack Rucksack) []string {
+func GetCompartmentsIntersections(compartments Compartments) []string {
 	intersections := make(map[string]bool, 0)
 	items := make(map[string]int)
 
-	for _, item := range rucksack[0] {
+	for _, item := range compartments[0] {
 		items[string(item)] = 1
 	}
 
-	for _, item := range rucksack[1] {
+	for _, item := range compartments[1] {
 		if _, ok := items[string(item)]; ok {
 			intersections[string(item)] = true
 		}
@@ -84,20 +82,70 @@ func GetRucksackIntersections(rucksack Rucksack) []string {
 	return set
 }
 
+func GetRucksackCompartments(rucksack Rucksack) Compartments {
+	compartments := Compartments{rucksack[:len(rucksack)/2], rucksack[len(rucksack)/2:]}
+
+	return compartments
+}
+
+func GetRucksackIntersections(rucksacks []Rucksack) []string {
+	intersections := make(map[string]bool, 0)
+	items := make(map[string]int)
+
+	for n, rucksack := range rucksacks {
+		for _, item := range rucksack {
+			if lastN, ok := items[string(item)]; ok && lastN == n-1 || n == lastN {
+				items[string(item)] = n
+			} else if n == 0 {
+				items[string(item)] = 0
+			}
+
+			if i, ok := items[string(item)]; ok && i == len(rucksacks)-1 {
+				intersections[string(item)] = true
+			}
+		}
+	}
+
+	set := make([]string, 0)
+
+	for item := range intersections {
+		set = append(set, item)
+	}
+
+	return set
+}
+
 func main() {
 	rucksacks := ParseInputFile("input_prod.txt")
-	intersections := make([]Rucksack, len(rucksacks))
+	intersections := make([]Compartments, len(rucksacks))
 
 	for _, rucksack := range rucksacks {
-		intersection := GetRucksackIntersections(rucksack)
+		compartments := GetRucksackCompartments(rucksack)
+		intersection := GetCompartmentsIntersections(compartments)
 		intersections = append(intersections, intersection)
 	}
 
+	// part one
 	sum := 0
 	for _, intersection := range intersections {
 		priority := GetIntersectionPriorities(intersection)
 		sum = sum + priority
 	}
 
-	fmt.Println("sum ->", sum)
+	fmt.Println("part one ->", sum)
+
+	// part two
+	sum = 0
+	for group := 0; group < len(rucksacks)/3; group = group + 1 {
+		from := group * 3
+		to := from + 3
+		if to > len(rucksacks) {
+			to = to % len(rucksacks)
+		}
+		rucksackGroup := rucksacks[from:to]
+		intersections := GetRucksackIntersections(rucksackGroup)
+		sum = sum + GetIntersectionPriorities(intersections)
+	}
+
+	fmt.Println("part two ->", sum)
 }
