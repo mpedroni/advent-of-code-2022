@@ -7,47 +7,24 @@ import (
 )
 
 func TestParsingFile(t *testing.T) {
-	rucksacks := ParseInputFile("input_test.txt")
+	elves := ParseInputFile("input_test.txt")
 
-	expect := []Rucksack{"vJrwpWtwJgWrhcsFMMfFFhFp", "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL", "PmmdzqPrVvPwwTWBwg", "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn", "ttgJtRGJQctTZtZT", "CrZsJsPPZsGzwwsLwLmpwMDw"}
+	expect := []ElfPair{{"2-4", "6-8"}, {"2-3", "4-5"}, {"5-7", "7-9"}, {"2-8", "3-7"}, {"6-6", "4-6"}, {"2-6", "4-8"}}
 
-	require.EqualValues(t, expect, rucksacks)
+	require.EqualValues(t, expect, elves)
 }
 
-func TestGetRucksackCompartments(t *testing.T) {
-	rucksack := "vJrwpWtwJgWrhcsFMMfFFhFp"
-	expected := Compartments{"vJrwpWtwJgWr", "hcsFMMfFFhFp"}
+func TestGetElfPairSectionsToClear(t *testing.T) {
+	pair := ElfPair{"2-4", "6-8"}
+	expect := []Section{{2, 4}, {6, 8}}
 
-	compartments := GetRucksackCompartments(rucksack)
-
-	require.EqualValues(t, expected, compartments)
+	require.EqualValues(t, expect, GetElfPairSectionsToClear(pair))
 }
 
-func TestFindIntersectionBetweenCompartments(t *testing.T) {
-	compartments := Compartments{"vJrwpWtwJgWr", "hcsFMMfFFhFp"}
-	expected := []string{"p"}
+func TestSectionsOverlapBetweenElfPairs(t *testing.T) {
+	notOverlappedSections := []Section{{2, 4}, {6, 8}}
+	overlappedSections := []Section{{2, 8}, {3, 7}}
 
-	intersections := GetCompartmentsIntersections(compartments)
-
-	require.EqualValues(t, expected, intersections)
-}
-
-func TestFindIntersectionsBetweenRucksacks(t *testing.T) {
-	rucksacks := []Rucksack{"vJrwpWtwJgWrhcsFMMfFFhFp", "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL", "PmmdzqPrVvPwwTWBwg"}
-	expected := []string{"r"}
-
-	badges := GetRucksackIntersections(rucksacks)
-
-	require.EqualValues(t, expected, badges)
-}
-
-func TestGetIntersectionsPriorities(t *testing.T) {
-	compartments := []Compartments{{"vJrwpWtwJgWr", "hcsFMMfFFhFp"}, {"jqHRNqRjqzjGDLGL", "rsFMfFZSrLrFZsSL"}}
-
-	intersections := [][]string{GetCompartmentsIntersections(compartments[0]), GetCompartmentsIntersections(compartments[1])}
-
-	priorities := []int{GetIntersectionPriorities(intersections[0]), GetIntersectionPriorities(intersections[1])}
-
-	require.EqualValues(t, 16, priorities[0])
-	require.EqualValues(t, 38, priorities[1])
+	require.False(t, IsElfSectionsOverlapped(notOverlappedSections[0], notOverlappedSections[1]))
+	require.True(t, IsElfSectionsOverlapped(overlappedSections[0], overlappedSections[1]))
 }
