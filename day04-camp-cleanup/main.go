@@ -40,7 +40,7 @@ func GetElfPairSectionsToClear(pair ElfPair) []Section {
 	return elves
 }
 
-func IsElfSectionsOverlapped(first, second Section) bool {
+func IsElfSectionsFullyOverlapped(first, second Section) bool {
 	oneStartAfterOtherEnd := first[1] < second[0] || second[1] < first[0]
 
 	if oneStartAfterOtherEnd {
@@ -53,10 +53,34 @@ func IsElfSectionsOverlapped(first, second Section) bool {
 	return isOverlapped
 }
 
+func IsElfSectionsOverlapped(first, second Section) bool {
+	oneStartAfterOtherEnd := first[1] < second[0] || second[1] < first[0]
+
+	if oneStartAfterOtherEnd {
+		return false
+	}
+
+	isOverlapped := first[0] <= second[0] || first[1] >= second[1] ||
+		second[0] <= first[0] || second[1] >= first[1]
+
+	return isOverlapped
+}
+
 func main() {
 	elves := ParseInputFile("input_prod.txt")
 
 	overlapped := 0
+	for _, pair := range elves {
+		sections := GetElfPairSectionsToClear(pair)
+		isOverlapped := IsElfSectionsFullyOverlapped(sections[0], sections[1])
+		if isOverlapped {
+			overlapped = overlapped + 1
+		}
+	}
+
+	fmt.Println("fully overlapped", overlapped)
+
+	overlapped = 0
 	for _, pair := range elves {
 		sections := GetElfPairSectionsToClear(pair)
 		isOverlapped := IsElfSectionsOverlapped(sections[0], sections[1])
