@@ -33,7 +33,7 @@ function createStacks(stacksAsString) {
   return stacks;
 }
 
-function makeMoves(moves, stacks) {
+function makeMovesForPartOne(moves, stacks) {
   for (const move of moves.split("\n")) {
     const splittedMove = move.split(" ");
     const quantity = Number(splittedMove[1]);
@@ -44,12 +44,33 @@ function makeMoves(moves, stacks) {
       stacks[to].push(stacks[from].pop());
     }
   }
+
+  return stacks;
 }
 
-let stacks = createStacks(stacksAsString);
-makeMoves(moves, stacks);
+function makeMovesForPartTwo(moves, stacks) {
+  for (const move of moves.split("\n")) {
+    const splittedMove = move.split(" ");
+    const quantity = Number(splittedMove[1]);
+    const from = Number(splittedMove[3]) - 1;
+    const to = Number(splittedMove[5]) - 1;
 
-// get the stack's top crates
-const result = stacks.map((stack) => stack.at(-1)).join("");
+    stacks[to].push(...stacks[from].splice(-quantity));
+  }
 
-console.log(result);
+  return stacks;
+}
+
+console.log(
+  "part one",
+  makeMovesForPartOne(moves, createStacks(stacksAsString))
+    .map((stack) => stack.at(-1))
+    .join("")
+);
+
+console.log(
+  "part two",
+  makeMovesForPartTwo(moves, createStacks(stacksAsString))
+    .map((stack) => stack.at(-1))
+    .join("")
+);
