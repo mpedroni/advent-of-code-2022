@@ -21,7 +21,7 @@ for (const line of history) {
   } else {
     const size = Number(args[0]);
 
-    for (let n = path.length; n >= 0; n--) {
+    for (let n = path.length; n > 0; n--) {
       const dir = path.slice(0, n).join("/");
       sizes[dir] = sizes[dir] ? sizes[dir] + size : size;
     }
@@ -34,3 +34,13 @@ const dirsWithSizeAtMostHundredThousand = Object.values(sizes).reduce(
 );
 
 console.log("part one", dirsWithSizeAtMostHundredThousand);
+
+const TOTAL_DISK_SPACE = 70_000_000;
+const AVAILABLE_SPACE = TOTAL_DISK_SPACE - sizes["/"];
+const NECESSARY_SPACE = 30_000_000;
+
+const dirsToDelete = Object.values(sizes).filter(
+  (size) => size >= NECESSARY_SPACE - AVAILABLE_SPACE
+);
+
+console.log("part two", Math.min(...dirsToDelete));
