@@ -9,25 +9,27 @@ function getMonkeys() {
 
     const items = monkey[1].split(":")[1];
     const operation = monkey[2].split("= ")[1];
+    const denominator = Number(monkey[3].split(" ").at(-1));
 
     const test = (result) => {
-      const dividend = Number(monkey[3].split(" ").at(-1));
-
-      if (result % dividend === 0) {
+      if (result % denominator === 0) {
         return Number(monkey[4].at(-1));
       } else {
         return Number(monkey[5].at(-1));
       }
     };
 
-    const result = (old, worryDivisor = 1) => {
-      return Math.floor(eval(operation) / worryDivisor);
+    // old is used in "operation"
+    const result = (old, worryFactor, part) => {
+      if (part === 1) return Math.floor(eval(operation) / worryFactor);
+      else return Math.floor(eval(operation) % worryFactor);
     };
 
     monkeys[i] = {
       items: items.split(",").map(Number),
       test,
       result,
+      denominator,
       inspections: 0,
     };
   }
@@ -35,14 +37,12 @@ function getMonkeys() {
   return monkeys;
 }
 
-const ROUNDS = 20;
-
-function play(monkeys, rounds, worryDivisor) {
-  for (let round = 0; round < ROUNDS; round++) {
+function play(monkeys, rounds, worryFactor, part) {
+  for (let round = 0; round < rounds; round++) {
     for (let monkey = 0; monkey < monkeys.length; monkey++) {
       const m = monkeys[monkey];
       for (const item of m.items) {
-        const result = m.result(item, 3);
+        const result = m.result(item, worryFactor, part);
         monkeys[m.test(result)].items.push(result);
         m.inspections++;
       }
@@ -55,7 +55,20 @@ function play(monkeys, rounds, worryDivisor) {
 
 console.log(
   "monkey business, part one",
-  play(getMonkeys(), 20, 3)
+  play(getMonkeys(), 20, 3, 1, 1)
+    .map((m) => m.inspections)
+    .sort((a, b) => b - a)
+    .slice(0, 2)
+    .reduce((acc, inspection) => acc * inspection)
+);
+
+const lcm = getMonkeys()
+  .map((m) => m.denominator)
+  .reduce((acc, d) => acc * d);
+
+console.log(
+  "monkey business, part two",
+  play(getMonkeys(), 10000, lcm)
     .map((m) => m.inspections)
     .sort((a, b) => b - a)
     .slice(0, 2)
